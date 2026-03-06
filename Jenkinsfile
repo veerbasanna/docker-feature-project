@@ -11,7 +11,7 @@ pipeline {
         stage('Checkout') {
             steps {
                 echo "Cloning repository"
-                git 'https://github.com/veerbasanna/docker-feature-project.git'
+                git branch: 'main', url: 'https://github.com/veerbasanna/docker-feature-project.git'
             }
         }
 
@@ -35,7 +35,7 @@ pipeline {
         stage('Test Application') {
             steps {
                 echo "Testing application"
-                sh 'curl http://100.53.169.96:8000'
+                sh 'curl http://localhost:8000'
             }
         }
 
