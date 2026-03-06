@@ -1,7 +1,6 @@
 pipeline {
 agent any
 
-```
 environment {
     IMAGE_NAME = "python-web-server"
     CONTAINER_NAME = "python-web-container"
@@ -19,7 +18,9 @@ stages {
     stage('Build Docker Image') {
         steps {
             echo "Building Docker image"
-            sh 'docker build -t $IMAGE_NAME .'
+            sh '''
+            docker build -t $IMAGE_NAME .
+            '''
         }
     }
 
@@ -34,6 +35,6 @@ stages {
     }
 
 }
-```
+
 
 }
