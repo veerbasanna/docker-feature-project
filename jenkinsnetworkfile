@@ -1,0 +1,70 @@
+pipeline {
+agent any
+
+environment {
+    IMAGE_NAME = "python-web-server"
+    CONTAINER1 = "container1"
+    CONTAINER2 = "container2"
+    NETWORK_NAME = "my_network"
+}
+
+stages {
+
+    stage('Checkout') {
+        steps {
+            echo "Cloning repository"
+            git branch: 'main', url: 'https://github.com/veerbasanna/docker-feature-project.git'
+        }
+    }
+
+    stage('Create Network') {
+        steps {
+            echo "Creating Docker private network"
+            sh '''
+            docker network create $NETWORK_NAME || true
+            '''
+        }
+    }
+
+    stage('Build Docker Image') {
+        steps {
+            echo "Building Docker image"
+            sh '''
+            docker build -t $IMAGE_NAME .
+            '''
+        }
+    }
+
+    stage('Run Containers') {
+        steps {
+            echo "Running two containers in private network"
+            sh '''
+            docker rm -f $CONTAINER1 $CONTAINER2 || true
+
+            docker run -d \
+            --name $CONTAINER1 \
+            --network $NETWORK_NAME \
+            -p 8001:8000 \
+            $IMAGE_NAME
+
+            docker run -d \
+            --name $CONTAINER2 \
+            --network $NETWORK_NAME \
+            -p 8002:8000 \
+            $IMAGE_NAME
+            '''
+        }
+    }
+
+    stage('Verify Network') {
+        steps {
+            echo "Checking containers in network"
+            sh '''
+            docker network inspect $NETWORK_NAME
+            '''
+        }
+    }
+
+}
+
+}
