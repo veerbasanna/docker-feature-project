@@ -4,7 +4,7 @@ agent any
 environment {
     IMAGE_NAME = "python-web-server"
     CONTAINER_NAME = "python-web-container"
-    DOCKER_HUB = "yourdockerhubusername"
+    DOCKER_HUB = "veereshbasanna"
 }
 
 stages {
