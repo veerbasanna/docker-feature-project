@@ -1,0 +1,60 @@
+pipeline {
+agent any
+
+environment {
+    IMAGE_NAME = "python-web-server"
+    CONTAINER_NAME = "python-web-container"
+    DOCKER_HUB = "yourdockerhubusername"
+}
+
+stages {
+
+    stage('Checkout') {
+        steps {
+            echo "Cloning repository"
+            git branch: 'main', url: 'https://github.com/veerbasanna/docker-feature-project.git'
+        }
+    }
+
+    stage('Build Docker Image') {
+        steps {
+            echo "Building Docker image"
+            sh '''
+            docker build -t $IMAGE_NAME .
+            '''
+        }
+    }
+
+    stage('Tag Image') {
+        steps {
+            echo "Tagging Docker image"
+            sh '''
+            docker tag $IMAGE_NAME $DOCKER_HUB/$IMAGE_NAME:latest
+            '''
+        }
+    }
+
+    stage('Push to Docker Hub') {
+        steps {
+            withCredentials([usernamePassword(credentialsId: 'dockerhub-credentials', usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD')]) {
+                sh '''
+                echo $PASSWORD | docker login -u $USERNAME --password-stdin
+                docker push $DOCKER_HUB/$IMAGE_NAME:latest
+                '''
+            }
+        }
+    }
+
+    stage('Run Container') {
+        steps {
+            echo "Running Docker container"
+            sh '''
+            docker rm -f $CONTAINER_NAME || true
+            docker run -d -p 8000:8000 --name $CONTAINER_NAME $IMAGE_NAME
+            '''
+        }
+    }
+
+}
+
+}
